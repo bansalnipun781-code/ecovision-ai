@@ -38,7 +38,7 @@ early_stop = EarlyStopping(patience=3, restore_best_weights=True)
 model.fit(
     train_data,
     validation_data=val_data,
-    epochs=10,
+    epochs=1,
     callbacks=[early_stop]
 )
 print(train_data.class_indices)

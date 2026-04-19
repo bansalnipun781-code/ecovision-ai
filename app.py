@@ -1,25 +1,41 @@
 import os
 from flask import Flask, request, render_template
-import tensorflow as tf
+from tensorflow.lite.python.interpreter import Interpreter
 import numpy as np
 from PIL import Image
 
 app = Flask(__name__)
 
-model = tf.keras.models.load_model("recycle_model.h5")
+# Load TFLite model
+interpreter = Interpreter(model_path="model.tflite")
+interpreter.allocate_tensors()
 
-classes = ['plastic','paper','glass','metal','organic','e-waste']
+input_details = interpreter.get_input_details()
+output_details = interpreter.get_output_details()
+
+classes = {'e-waste': 0, 'glass': 1, 'metal': 2, 'organic': 3, 'paper': 4, 'plastic': 5}
+
 
 def predict(img):
-    img = img.resize((224,224))
-    img = np.array(img)/255.0
+    # preprocess image
+    img = img.resize((224, 224))
+    img = np.array(img).astype(np.float32) / 255.0
     img = np.expand_dims(img, axis=0)
 
-    pred = model.predict(img)[0]
+    # set input tensor
+    interpreter.set_tensor(input_details[0]['index'], img)
+
+    # run inference
+    interpreter.invoke()
+
+    # get output
+    pred = interpreter.get_tensor(output_details[0]['index'])[0]
+
     class_idx = np.argmax(pred)
     confidence = float(np.max(pred))
 
     return classes[class_idx], confidence
+
 
 def get_recommendation(category):
     rec = {
@@ -31,6 +47,7 @@ def get_recommendation(category):
         "e-waste": "Dispose at e-waste center"
     }
     return rec[category]
+
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -45,9 +62,15 @@ def index():
         result, conf = predict(img)
         rec = get_recommendation(result)
 
-        return render_template("index.html", result=result, rec=rec, conf=conf)
+        return render_template(
+            "index.html",
+            result=result,
+            rec=rec,
+            conf=conf
+        )
 
     return render_template("index.html")
+
 
 if __name__ == "__main__":
     app.run(debug=True)

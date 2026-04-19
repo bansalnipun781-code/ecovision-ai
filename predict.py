@@ -4,14 +4,7 @@ from keras.models import load_model
 
 model = load_model("recycle_model.h5")
 
-CLASSES = [
-    "plastic",
-    "paper",
-    "glass",
-    "metal",
-    "organic",
-    "e-waste"
-]
+CLASSES = {'e-waste': 0, 'glass': 1, 'metal': 2, 'organic': 3, 'paper': 4, 'plastic': 5}
 
 def preprocess_image(image_path):
     img = Image.open(image_path).convert("RGB")
