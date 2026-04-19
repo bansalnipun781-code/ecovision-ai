@@ -1,17 +1,9 @@
 import numpy as np
 from PIL import Image
-import tflite_runtime.interpreter as tflite
+from keras.models import load_model
 
-# -------------------------------
-# Load TFLite Model
-# -------------------------------
-interpreter = tflite.Interpreter(model_path="model.tflite")
-interpreter.allocate_tensors()
+model = load_model("recycle_model.h5")
 
-input_details = interpreter.get_input_details()
-output_details = interpreter.get_output_details()
-
-# Waste Classes
 CLASSES = [
     "plastic",
     "paper",
@@ -21,36 +13,23 @@ CLASSES = [
     "e-waste"
 ]
 
-
-# -------------------------------
-# Image Preprocessing
-# -------------------------------
 def preprocess_image(image_path):
     img = Image.open(image_path).convert("RGB")
-    img = img.resize((224, 224))
+    img = img.resize((224,224))
 
-    img_array = np.array(img, dtype=np.float32)
-    img_array = img_array / 255.0
-    img_array = np.expand_dims(img_array, axis=0)
+    img = np.array(img)/255.0
+    img = np.expand_dims(img, axis=0)
 
-    return img_array
+    return img
 
 
-# -------------------------------
-# Prediction Function
-# -------------------------------
 def predict(image_path):
 
     image = preprocess_image(image_path)
 
-    interpreter.set_tensor(input_details[0]['index'], image)
-    interpreter.invoke()
+    preds = model.predict(image)[0]
 
-    output = interpreter.get_tensor(output_details[0]['index'])[0]
+    idx = np.argmax(preds)
+    confidence = float(preds[idx])
 
-    predicted_index = np.argmax(output)
-    confidence = float(output[predicted_index])
-
-    predicted_class = CLASSES[predicted_index]
-
-    return predicted_class, confidence
+    return CLASSES[idx], confidence
