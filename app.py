@@ -1,6 +1,6 @@
 import os
 from flask import Flask, request, render_template
-from tensorflow.lite.python.interpreter import Interpreter
+from tflite_runtime.interpreter import Interpreter
 import numpy as np
 from PIL import Image
 
