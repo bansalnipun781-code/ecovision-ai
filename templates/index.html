@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AI Recycling Assistant - Classify and properly dispose of your waste.">
+    <title>EcoVision | AI Recycling Assistant</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <form method="POST" enctype="multipart/form-data">
+    <input type="file" name="image" required>
+    <button type="submit">Analyze</button>
+    </form>
+    <div class="app-container">
+        <header>
+            <div class="logo">
+                <i class="fa-solid fa-leaf"></i>
+                <h1>EcoVision</h1>
+            </div>
+            <p>Smart Waste Classification AI</p>
+        </header>
+
+        <main>
+            <section class="upload-section" id="uploadSection">
+                <div class="drop-zone" id="dropZone">
+                    <div class="drop-zone-content">
+                        <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
+                        <h2>Upload an image of your waste</h2>
+                        <p>Drag & drop a file here, or click to browse</p>
+                        <span class="file-hint">Supports: JPG, PNG, WEBP (Max 5MB)</span>
+                    </div>
+                    <input type="file" id="fileInput" accept="image/*" hidden>
+                </div>
+            </section>
+
+            <section class="result-section hidden" id="resultSection">
+                <div class="analysis-container">
+                    <div class="preview-card glass-panel">
+                        <h3>Scanned Item</h3>
+                        <div class="image-wrapper">
+                            <img id="imagePreview" src="" alt="Uploaded waste item">
+                        </div>
+                        <button id="resetBtn" class="btn-secondary"><i class="fa-solid fa-rotate-right"></i> Scan Another Item</button>
+                    </div>
+
+                    <div class="details-container">
+                        <div class="prediction-card glass-panel" id="predictionCard">
+                            <div class="loading-state" id="loadingState">
+                                <div class="scanner-animation"></div>
+                                <p>Analyzing material composition...</p>
+                            </div>
+                            
+                            <div class="result-content hidden" id="resultContent">
+                                <div class="classification-badge" id="classificationBadge">
+                                    <i class="fa-solid fa-recycle"></i>
+                                    <span id="classificationText">Recyclable</span>
+                                </div>
+                                
+                                <h2 class="material-title" id="materialType">Plastic Bottle (PET)</h2>
+                                <div class="confidence-meter">
+                                    <div class="meter-header">
+                                        <span>AI Confidence</span>
+                                        <span id="confidenceValue">98%</span>
+                                    </div>
+                                    <div class="meter-track">
+                                        <div class="meter-fill" id="confidenceFill"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="recommendation-card glass-panel hidden" id="recommendationCard">
+                            <h3><i class="fa-solid fa-lightbulb"></i> Disposal Instructions</h3>
+                            <ul class="steps-list" id="recommendationList">
+                                <li>Empty all liquids before recycling.</li>
+                                <li>Crush the bottle to save space.</li>
+                                <li>Leave the cap on, it's recyclable too!</li>
+                                <li>Place in the blue mixed-recycling bin.</li>
+                            </ul>
+                            <div class="eco-fact">
+                                <strong><i class="fa-solid fa-earth-americas"></i> Eco Impact:</strong> Recycling this saves enough energy to power a 60W bulb for 6 hours.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    {% if result %}
+    <img src="{{ url_for('static', filename='uploaded.jpg') }}">
+
+    <h3>Prediction: {{ result }}</h3>
+    <h4>Confidence: {{ (conf * 100)|round(2) }}%</h4>
+    <p>{{ rec }}</p>
+    {% endif %}
+</body>
+</html>
